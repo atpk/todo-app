@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Todo = () => {
   const [todos, setTodos] = useState([]);
@@ -7,33 +8,53 @@ const Todo = () => {
   const [timeRequired, setTimeRequired] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [currentTodoId, setCurrentTodoId] = useState(null);
+  const navigate = useNavigate();
 
   const backendUrl = process.env.REACT_APP_BACKEND_URL;
+  const token = localStorage.getItem("token");
+
+  const fetchTodos = useCallback(async () => {
+    try {
+      const response = await axios.get(`${backendUrl}/todos`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setTodos(response.data);
+    } catch (error) {
+      console.error("Fetch todos error", error);
+      if (error.response && error.response.status === 401) {
+        localStorage.removeItem("token");
+        navigate("/login");
+      }
+    }
+  }, [backendUrl, token, navigate]);
 
   useEffect(() => {
-    fetchTodos();
-  }, []);
-
-  const fetchTodos = async () => {
-    const response = await axios.get(`${backendUrl}/todos`);
-    setTodos(response.data);
-  };
-
-  const addOrUpdateTodo = async () => {
-    if (isEditing) {
-      await axios.put(`${backendUrl}/todos/${currentTodoId}`, {
-        name,
-        timeRequired,
-      });
-      setIsEditing(false);
-      setCurrentTodoId(null);
-    } else {
-      const newTodo = { name, timeRequired };
-      await axios.post(`${backendUrl}/todos`, newTodo);
+    if (!token) {
+      navigate("/login");
+      return;
     }
     fetchTodos();
-    setName("");
-    setTimeRequired("");
+  }, [token, fetchTodos, navigate]);
+
+  const addOrUpdateTodo = async () => {
+    const url = isEditing
+      ? `${backendUrl}/todos/${currentTodoId}`
+      : `${backendUrl}/todos`;
+    const method = isEditing ? "put" : "post";
+    const todoData = { name, timeRequired };
+
+    try {
+      await axios[method](url, todoData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      fetchTodos();
+      setName("");
+      setTimeRequired("");
+      setIsEditing(false);
+      setCurrentTodoId(null);
+    } catch (error) {
+      console.error("Add/Update todo error", error);
+    }
   };
 
   const editTodo = (todo) => {
@@ -44,8 +65,14 @@ const Todo = () => {
   };
 
   const deleteTodo = async (id) => {
-    await axios.delete(`${backendUrl}/todos/${id}`);
-    fetchTodos();
+    try {
+      await axios.delete(`${backendUrl}/todos/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      fetchTodos();
+    } catch (error) {
+      console.error("Delete todo error", error);
+    }
   };
 
   return (

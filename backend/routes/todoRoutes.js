@@ -1,21 +1,35 @@
 const express = require("express");
+const jwt = require("jsonwebtoken");
 const Todo = require("../models/todo");
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {
+const authenticate = (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.status(401).json({ message: "No token provided" });
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err)
+      return res.status(401).json({ message: "Failed to authenticate token" });
+
+    req.userId = decoded.userId;
+    next();
+  });
+};
+
+router.get("/", authenticate, async (req, res) => {
   try {
-    const todos = await Todo.find();
+    const todos = await Todo.find({ userId: req.userId });
     res.json(todos);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", authenticate, async (req, res) => {
   const todo = new Todo({
-    name: req.body.name,
-    timeRequired: req.body.timeRequired,
+    ...req.body,
+    userId: req.userId,
   });
 
   try {
@@ -26,24 +40,28 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
-  const { id } = req.params;
-
+router.put("/:id", authenticate, async (req, res) => {
   try {
-    const updatedTodo = await Todo.findByIdAndUpdate(id, req.body, {
-      new: true,
-    });
+    const updatedTodo = await Todo.findOneAndUpdate(
+      { _id: req.params.id, userId: req.userId },
+      req.body,
+      { new: true }
+    );
+    if (!updatedTodo)
+      return res.status(404).json({ message: "Todo not found" });
     res.json(updatedTodo);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-router.delete("/:id", async (req, res) => {
-  const { id } = req.params;
-
+router.delete("/:id", authenticate, async (req, res) => {
   try {
-    await Todo.findByIdAndDelete(id);
+    const todo = await Todo.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.userId,
+    });
+    if (!todo) return res.status(404).json({ message: "Todo not found" });
     res.json({ message: "Todo deleted" });
   } catch (err) {
     res.status(500).json({ message: err.message });
