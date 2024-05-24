@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import NavBar from "./components/NavBar";
-import Todo from "./components/Todo";
+import Info from "./components/Info";
 import Login from "./components/Login";
 import Register from "./components/Register";
 
@@ -12,7 +12,7 @@ const App = () => {
         <NavBar />
         <div className="container">
           <Routes>
-            <Route path="/todos" element={<Todo />} />
+            <Route path="/todos" element={<Info />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/" element={<Login />} />
