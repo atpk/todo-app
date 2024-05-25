@@ -1,7 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
-
+const axios = require("axios");
 const router = express.Router();
 
 router.post("/register", async (req, res) => {
@@ -16,7 +16,17 @@ router.post("/register", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, recaptchaToken } = req.body;
+
+    // Verify reCAPTCHA
+    const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+    const verificationUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${recaptchaToken}`;
+
+    const response = await axios.post(verificationUrl);
+    if (!response.data.success) {
+      return res.status(400).json({ message: "reCAPTCHA verification failed" });
+    }
+
     const user = await User.findOne({ username });
     if (!user || !(await user.comparePassword(password))) {
       return res.status(401).json({ message: "Invalid credentials" });

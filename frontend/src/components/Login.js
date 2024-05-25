@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import axios from "axios";
+import ReCAPTCHA from "react-google-recaptcha";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -15,6 +17,7 @@ const Login = () => {
         {
           username,
           password,
+          recaptchaToken,
         }
       );
       localStorage.setItem("token", response.data.token);
@@ -23,6 +26,10 @@ const Login = () => {
       console.error("Login error", error);
       alert("Login failed");
     }
+  };
+
+  const onReCAPTCHAChange = (token) => {
+    setRecaptchaToken(token);
   };
 
   return (
@@ -47,6 +54,10 @@ const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
+        <ReCAPTCHA
+          sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
+          onChange={onReCAPTCHAChange}
+        />
         <button type="submit" className="btn btn-primary">
           Login
         </button>
