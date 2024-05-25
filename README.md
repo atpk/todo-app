@@ -112,6 +112,27 @@ Open your browser and navigate to http://localhost:3000.
 4. GET /todos: Retrieve user information.
 5. POST /predict: Predict diabetes probability.
 
+# Project Structure
+
+    ```
+    .
+    ├── backend
+    │   ├── models
+    │   ├── routes
+    │   ├── server.js
+    |   ├── .env
+    │   └── model.onnx (your ONNX model file)
+    ├── frontend
+    │   ├── public
+    │   ├── src
+    │   │   ├── components
+    │   │   ├── App.js
+    │   │   ├── index.js
+    │   └── .env
+    ├── README.md
+    └── package.json
+    ```
+
 # Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request.
