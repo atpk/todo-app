@@ -21,7 +21,29 @@ const Info = () => {
       const response = await axios.get(`${backendUrl}/todos`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setTodos(response.data);
+
+      const userInfoData = await Promise.all(
+        response.data.map(async (userInfo) => {
+          const predictionResponse = await axios.post(
+            `${backendUrl}/todos/predict`,
+            {
+              age: userInfo.age,
+              weight: userInfo.weight,
+              height: userInfo.height,
+              gender: userInfo.gender,
+            },
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          return {
+            ...userInfo,
+            diabetes_probability: predictionResponse.data.diabetes_probability,
+          };
+        })
+      );
+
+      setTodos(userInfoData);
     } catch (error) {
       console.error("Fetch todos error", error);
       if (error.response && error.response.status === 401) {
@@ -133,8 +155,9 @@ const Info = () => {
         />
       </div>
       <button className="btn btn-primary mb-3" onClick={addOrUpdateTodo}>
-        {isEditing ? "Update Todo" : "Add Todo"}
+        {isEditing ? "Update Data" : "Add Data"}
       </button>
+      <h2 className="text-center mb-4">Data Info</h2>
       <table className="table">
         <thead>
           <tr>
@@ -144,8 +167,8 @@ const Info = () => {
             <th scope="col">Weight</th>
             <th scope="col">Height</th>
             <th scope="col">Gender</th>
+            <th scope="col">Diabetes Probability</th>
             <th scope="col">Actions</th>
-            <th scope="col">Sum</th>
           </tr>
         </thead>
         <tbody>
@@ -157,6 +180,7 @@ const Info = () => {
               <td>{todo.weight}</td>
               <td>{todo.height}</td>
               <td>{todo.gender}</td>
+              <td>{todo.diabetes_probability}</td>
               <td>
                 <button
                   className="btn btn-info me-2"
@@ -171,7 +195,6 @@ const Info = () => {
                   Delete
                 </button>
               </td>
-              <td>{todo.age + todo.weight + todo.height}</td>
             </tr>
           ))}
         </tbody>

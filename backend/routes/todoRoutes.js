@@ -5,6 +5,7 @@ const {
   getInfos,
   updateInfo,
   deleteInfo,
+  predictDiabetes,
 } = require("../controllers/infoController");
 
 const router = express.Router();
@@ -29,5 +30,7 @@ router.post("/", authenticate, createInfo);
 router.put("/:id", authenticate, updateInfo);
 
 router.delete("/:id", authenticate, deleteInfo);
+
+router.post("/predict", authenticate, predictDiabetes);
 
 module.exports = router;
