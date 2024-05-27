@@ -38,6 +38,11 @@ const NavBar = () => {
                 </Link>
               </li>
             )}
+            <li className="nav-item">
+              <Link className="nav-link" to="/predict-diabetes">
+                Predict Diabetes
+              </Link>
+            </li>
           </ul>
         </div>
       </div>

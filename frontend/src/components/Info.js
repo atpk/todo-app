@@ -33,9 +33,6 @@ const Info = () => {
               weight: userInfo.weight,
               height: userInfo.height,
               gender: userInfo.gender,
-            },
-            {
-              headers: { Authorization: `Bearer ${token}` },
             }
           );
           return {

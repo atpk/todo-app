@@ -31,6 +31,6 @@ router.put("/:id", authenticate, updateInfo);
 
 router.delete("/:id", authenticate, deleteInfo);
 
-router.post("/predict", authenticate, predictDiabetes);
+router.post("/predict", predictDiabetes);
 
 module.exports = router;
