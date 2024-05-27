@@ -34,7 +34,7 @@ exports.getInfos = async (req, res) => {
 exports.updateInfo = async (req, res) => {
   try {
     const { name, age, weight, height, gender } = req.body;
-    const updatedInfo = await UserInfo.findByIdAndUpdate(
+    const updatedInfo = await Info.findByIdAndUpdate(
       req.params.id,
       { name, age, weight, height, gender },
       { new: true }

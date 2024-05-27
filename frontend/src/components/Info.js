@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import SimpleChart from "./SimpleChart";
+import Charts from "./Charts";
 
 const Info = () => {
   const [todos, setTodos] = useState([]);
@@ -199,6 +201,10 @@ const Info = () => {
           ))}
         </tbody>
       </table>
+      <h2>Simple Charts</h2>
+      <SimpleChart data={todos} />
+      <h2>Modifiable Charts</h2>
+      <Charts data={todos} />
     </div>
   );
 };
