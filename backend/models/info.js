@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const todoSchema = new mongoose.Schema({
+const infoSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   name: {
     type: String,
@@ -24,6 +24,6 @@ const todoSchema = new mongoose.Schema({
   },
 });
 
-const Info = mongoose.model("Todo", todoSchema);
+const Info = mongoose.model("Info", infoSchema);
 
 module.exports = Info;

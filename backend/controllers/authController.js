@@ -1,4 +1,4 @@
-const User = require("../models/userModel");
+const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -12,13 +12,10 @@ exports.register = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
     // Create a new user
     const newUser = new User({
       username,
-      password: hashedPassword,
+      password,
     });
 
     await newUser.save();
@@ -39,7 +36,7 @@ exports.login = async (req, res) => {
     }
 
     // Compare the password
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid username or password" });
     }

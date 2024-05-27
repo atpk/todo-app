@@ -39,7 +39,7 @@ exports.updateInfo = async (req, res) => {
       { name, age, weight, height, gender },
       { new: true }
     );
-    res.status(200), json(updatedInfo);
+    res.status(200).json(updatedInfo);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
