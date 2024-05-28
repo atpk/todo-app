@@ -13,6 +13,7 @@ const Info = () => {
   const [gender, setGender] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [currentTodoId, setCurrentTodoId] = useState(null);
+  const [predictionSuccess, setpredictionSuccess] = useState(false);
   const navigate = useNavigate();
 
   const backendUrl = process.env.REACT_APP_BACKEND_URL;
@@ -26,18 +27,30 @@ const Info = () => {
 
       const userInfoData = await Promise.all(
         response.data.map(async (userInfo) => {
+          // const inputData = [[0.1, 0.2, 0.3]];
+          const h = parseFloat(userInfo.height) / 100;
+          const bmi = parseFloat(weight) / (h * h);
+          const genderEncoded =
+            userInfo.gender.toLowerCase() === "male" ? 0 : 1;
+
           const predictionResponse = await axios.post(
-            `${backendUrl}/todos/predict`,
+            "http://3.87.154.7:5000/predict",
             {
-              age: userInfo.age,
-              weight: userInfo.weight,
-              height: userInfo.height,
-              gender: userInfo.gender,
+              input: [
+                [
+                  parseFloat(genderEncoded),
+                  parseFloat(userInfo.age),
+                  parseFloat(bmi),
+                ],
+              ],
             }
           );
+          console.log(predictionResponse);
+          setpredictionSuccess(true);
+
           return {
             ...userInfo,
-            diabetes_probability: predictionResponse.data.diabetes_probability,
+            diabetes_probability: predictionResponse.data.prediction,
           };
         })
       );
@@ -45,6 +58,7 @@ const Info = () => {
       setTodos(userInfoData);
     } catch (error) {
       console.error("Fetch todos error", error);
+      setpredictionSuccess(false);
       if (error.response && error.response.status === 401) {
         localStorage.removeItem("token");
         navigate("/login");
@@ -166,7 +180,7 @@ const Info = () => {
             <th scope="col">Weight</th>
             <th scope="col">Height</th>
             <th scope="col">Gender</th>
-            <th scope="col">Diabetes Probability</th>
+            {predictionSuccess && <th scope="col">Diabetes Probability</th>}
             <th scope="col">Actions</th>
           </tr>
         </thead>
@@ -179,7 +193,7 @@ const Info = () => {
               <td>{todo.weight}</td>
               <td>{todo.height}</td>
               <td>{todo.gender}</td>
-              <td>{todo.diabetes_probability}</td>
+              {predictionSuccess && <td>{todo.diabetes_probability}</td>}
               <td>
                 <button
                   className="btn btn-info me-2"
