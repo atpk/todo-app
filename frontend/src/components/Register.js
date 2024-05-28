@@ -3,13 +3,19 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const Register = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [emailError, setEmailError] = useState("");
   const navigate = useNavigate();
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const validatePassword = (password) => {
     const minLength = 6;
@@ -28,6 +34,12 @@ const Register = () => {
   };
 
   useEffect(() => {
+    if (email && !validateEmail(email)) {
+      setEmailError("Please enter a valid email address.");
+    } else {
+      setEmailError("");
+    }
+
     if (password && !validatePassword(password)) {
       setPasswordError(
         "Password must be at least 6 characters long and contain at least one lowercase letter, one uppercase letter, one number, and one special character."
@@ -41,7 +53,7 @@ const Register = () => {
     } else {
       setConfirmPasswordError("");
     }
-  }, [password, confirmPassword]);
+  }, [email, password, confirmPassword]);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -53,7 +65,7 @@ const Register = () => {
       }
 
       await axios.post(`${process.env.REACT_APP_BACKEND_URL}/auth/register`, {
-        username,
+        username: email,
         password,
       });
       navigate("/login");
@@ -72,10 +84,12 @@ const Register = () => {
           <input
             type="text"
             className="form-control"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
           />
+          {emailError && <small className="text-danger">{emailError}</small>}
         </div>
         <div className="mb-3">
           <input
@@ -106,7 +120,7 @@ const Register = () => {
         <button
           type="submit"
           className="btn btn-primary"
-          disabled={passwordError || confirmPasswordError}
+          disabled={emailError || passwordError || confirmPasswordError}
         >
           Register
         </button>
