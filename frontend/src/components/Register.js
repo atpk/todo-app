@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import ReCAPTCHA from "react-google-recaptcha";
 import { useNavigate } from "react-router-dom";
 
 const Register = () => {
@@ -10,6 +11,7 @@ const Register = () => {
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [emailError, setEmailError] = useState("");
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
   const navigate = useNavigate();
 
   const validateEmail = (email) => {
@@ -67,12 +69,17 @@ const Register = () => {
       await axios.post(`${process.env.REACT_APP_BACKEND_URL}/auth/register`, {
         username: email,
         password,
+        recaptchaToken,
       });
       navigate("/login");
     } catch (error) {
       console.error("Registration error", error);
       alert("Registration failed");
     }
+  };
+
+  const onReCAPTCHAChange = (token) => {
+    setRecaptchaToken(token);
   };
 
   return (
@@ -117,6 +124,10 @@ const Register = () => {
             <small className="text-danger">{confirmPasswordError}</small>
           )}
         </div>
+        <ReCAPTCHA
+          sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
+          onChange={onReCAPTCHAChange}
+        />
         <button
           type="submit"
           className="btn btn-primary"
