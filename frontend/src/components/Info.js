@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import SimpleChart from "./SimpleChart";
-import Charts from "./Charts";
+import { fetchTodos } from "../api";
 
 const Info = () => {
   const [todos, setTodos] = useState([]);
@@ -11,73 +10,25 @@ const Info = () => {
   const [weight, setWeight] = useState("");
   const [height, setHeight] = useState("");
   const [gender, setGender] = useState("");
-  // const [error, setError] = useState(null);
-  // const [ageError, setAgeError] = useState("");
-  // const [weightError, setWeightError] = useState("");
-  // const [heightError, setHeightError] = useState("");
-  // const [genderError, setGenderError] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [currentTodoId, setCurrentTodoId] = useState(null);
-  const [predictionSuccess, setpredictionSuccess] = useState(false);
   const navigate = useNavigate();
 
   const backendUrl = process.env.REACT_APP_BACKEND_URL;
   const token = localStorage.getItem("token");
 
-  const fetchTodos = useCallback(async () => {
-    try {
-      const response = await axios.get(`${backendUrl}/todos`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const userInfoData = await Promise.all(
-        response.data.map(async (userInfo) => {
-          // const inputData = [[0.1, 0.2, 0.3]];
-          const h = parseFloat(userInfo.height) / 100;
-          const bmi = parseFloat(weight) / (h * h);
-          const genderEncoded =
-            userInfo.gender.toLowerCase() === "male" ? 0 : 1;
-
-          const predictionResponse = await axios.post(
-            "http://54.242.130.105:5000/predict",
-            {
-              input: [
-                [
-                  parseFloat(genderEncoded),
-                  parseFloat(userInfo.age),
-                  parseFloat(bmi),
-                ],
-              ],
-            }
-          );
-          console.log(predictionResponse);
-          setpredictionSuccess(true);
-
-          return {
-            ...userInfo,
-            diabetes_probability: predictionResponse.data.prediction,
-          };
-        })
-      );
-
-      setTodos(userInfoData);
-    } catch (error) {
-      console.error("Fetch todos error", error);
-      setpredictionSuccess(false);
-      if (error.response && error.response.status === 401) {
-        localStorage.removeItem("token");
-        navigate("/login");
-      }
-    }
-  }, [backendUrl, token, navigate]);
+  const loadInfos = useCallback(async () => {
+    const todosData = await fetchTodos(backendUrl, token);
+    setTodos(todosData);
+  }, [backendUrl, token]);
 
   useEffect(() => {
     if (!token) {
       navigate("/login");
       return;
     }
-    fetchTodos();
-  }, [token, fetchTodos, navigate]);
+    loadInfos();
+  }, [token, loadInfos, navigate]);
 
   const addOrUpdateTodo = async () => {
     const url = isEditing
@@ -90,7 +41,7 @@ const Info = () => {
       await axios[method](url, todoData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      fetchTodos();
+      loadInfos();
       setName("");
       setAge("");
       setWeight("");
@@ -118,11 +69,15 @@ const Info = () => {
       await axios.delete(`${backendUrl}/todos/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      fetchTodos();
+      loadInfos();
     } catch (error) {
       console.error("Delete todo error", error);
     }
   };
+
+  const hasDiabetesProbability = todos.some(
+    (todo) => todo.diabetes_probability !== undefined
+  );
 
   return (
     <div className="container mt-4">
@@ -195,7 +150,9 @@ const Info = () => {
             <th scope="col">Weight</th>
             <th scope="col">Height</th>
             <th scope="col">Gender</th>
-            {predictionSuccess && <th scope="col">Diabetes Probability</th>}
+            {hasDiabetesProbability && (
+              <th scope="col">Diabetes Probability</th>
+            )}
             <th scope="col">Actions</th>
           </tr>
         </thead>
@@ -208,7 +165,9 @@ const Info = () => {
               <td>{todo.weight}</td>
               <td>{todo.height}</td>
               <td>{todo.gender}</td>
-              {predictionSuccess && <td>{todo.diabetes_probability}</td>}
+              {todo.diabetes_probability !== undefined && (
+                <td>{todo.diabetes_probability}</td>
+              )}
               <td>
                 <button
                   className="btn btn-info me-2"
@@ -227,10 +186,6 @@ const Info = () => {
           ))}
         </tbody>
       </table>
-      <h2>Simple Charts</h2>
-      <SimpleChart data={todos} />
-      <h2>Modifiable Charts</h2>
-      <Charts data={todos} />
     </div>
   );
 };

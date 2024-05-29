@@ -30,6 +30,13 @@ const NavBar = () => {
         </Link>
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
+            {token && (
+              <li className="nav-item">
+                <Link className="nav-link" to="/analytics">
+                  Analytics
+                </Link>
+              </li>
+            )}
             {renderAuthButton()}
             {token || location.pathname === "/register" ? null : (
               <li className="nav-item">
