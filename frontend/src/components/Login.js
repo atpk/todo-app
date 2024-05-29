@@ -78,6 +78,9 @@ const Login = () => {
         <button type="submit" className="btn btn-primary" disabled={emailError}>
           Login
         </button>
+        <div className="mt-3">
+          <a href="/forgot-password">Forgot Password?</a>
+        </div>
       </form>
     </div>
   );
