@@ -67,7 +67,7 @@ const Register = () => {
       }
 
       await axios.post(`${process.env.REACT_APP_BACKEND_URL}/auth/register`, {
-        username: email,
+        email,
         password,
         recaptchaToken,
       });

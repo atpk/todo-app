@@ -11,6 +11,11 @@ const Info = () => {
   const [weight, setWeight] = useState("");
   const [height, setHeight] = useState("");
   const [gender, setGender] = useState("");
+  // const [error, setError] = useState(null);
+  // const [ageError, setAgeError] = useState("");
+  // const [weightError, setWeightError] = useState("");
+  // const [heightError, setHeightError] = useState("");
+  // const [genderError, setGenderError] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [currentTodoId, setCurrentTodoId] = useState(null);
   const [predictionSuccess, setpredictionSuccess] = useState(false);
@@ -34,7 +39,7 @@ const Info = () => {
             userInfo.gender.toLowerCase() === "male" ? 0 : 1;
 
           const predictionResponse = await axios.post(
-            "http://3.87.154.7:5000/predict",
+            "http://54.242.130.105:5000/predict",
             {
               input: [
                 [
@@ -129,6 +134,7 @@ const Info = () => {
           placeholder="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          required
         />
       </div>
       <div className="mb-3">
@@ -138,6 +144,8 @@ const Info = () => {
           placeholder="Age"
           value={age}
           onChange={(e) => setAge(e.target.value)}
+          min="1"
+          required
         />
       </div>
       <div className="mb-3">
@@ -147,6 +155,8 @@ const Info = () => {
           placeholder="Weight"
           value={weight}
           onChange={(e) => setWeight(e.target.value)}
+          min="1"
+          required
         />
       </div>
       <div className="mb-3">
@@ -156,16 +166,21 @@ const Info = () => {
           placeholder="Height"
           value={height}
           onChange={(e) => setHeight(e.target.value)}
+          min="1"
+          required
         />
       </div>
       <div className="mb-3">
-        <input
-          type="text"
+        <select
           className="form-control"
-          placeholder="Gender"
           value={gender}
           onChange={(e) => setGender(e.target.value)}
-        />
+          required
+        >
+          <option value="">Select Gender</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
       </div>
       <button className="btn btn-primary mb-3" onClick={addOrUpdateTodo}>
         {isEditing ? "Update Data" : "Add Data"}

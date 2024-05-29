@@ -69,17 +69,12 @@ const PredictDiabetes = () => {
       return;
     }
 
-    if (!age || !weight || !height || !gender) {
-      setError("All fields are required.");
-      return;
-    }
-
     try {
       const h = parseFloat(height) / 100;
       const bmi = parseFloat(weight) / (h * h);
       const genderEncoded = gender.toLowerCase() === "male" ? 0 : 1;
 
-      const response = await axios.post("http://3.87.154.7:5000/predict", {
+      const response = await axios.post("http://54.242.130.105:5000/predict", {
         input: [[parseFloat(age), parseFloat(bmi), parseFloat(genderEncoded)]],
       });
 

@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.post("/register", async (req, res) => {
   try {
-    const { username, password, recaptchaToken } = req.body;
+    const { email, password, recaptchaToken } = req.body;
 
     // Verify reCAPTCHA
     const secretKey = process.env.RECAPTCHA_SECRET_KEY;
@@ -17,13 +17,13 @@ router.post("/register", async (req, res) => {
     }
 
     // Check if user already exists
-    const existingUser = await User.findOne({ username });
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
 
     const user = new User({
-      username,
+      email,
       password,
     });
     await user.save();
@@ -35,7 +35,7 @@ router.post("/register", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   try {
-    const { username, password, recaptchaToken } = req.body;
+    const { email, password, recaptchaToken } = req.body;
 
     // Verify reCAPTCHA
     const secretKey = process.env.RECAPTCHA_SECRET_KEY;
@@ -46,9 +46,9 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "reCAPTCHA verification failed" });
     }
 
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ email });
     if (!user || !(await user.comparePassword(password))) {
-      return res.status(401).json({ message: "Invalid username or password" });
+      return res.status(401).json({ message: "Invalid email or password" });
     }
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
