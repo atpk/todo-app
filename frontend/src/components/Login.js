@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ReCAPTCHA from "react-google-recaptcha";
 import { useNavigate } from "react-router-dom";
+import { validateEmail } from "./utils/validationUtils";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -9,11 +10,6 @@ const Login = () => {
   const [recaptchaToken, setRecaptchaToken] = useState(null);
   const [emailError, setEmailError] = useState("");
   const navigate = useNavigate();
-
-  const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
 
   useEffect(() => {
     if (email && !validateEmail(email)) {

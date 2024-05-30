@@ -1,22 +1,22 @@
 const mongoose = require("mongoose");
-// const bcrypt = require("bcrypt");
+const bcrypt = require("bcrypt");
 
 const emailVerificationSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: false },
   otp: { type: String },
   otpExpiration: { type: Date },
 });
 
-// emailVerificationSchema.pre("save", async function (next) {
-//   if (this.isModified("password") || this.isNew) {
-//     this.password = await bcrypt.hash(this.password, 10);
-//   }
-//   next();
-// });
+emailVerificationSchema.pre("save", async function (next) {
+  if (this.isModified("otp") || this.isNew) {
+    this.otp = await bcrypt.hash(this.otp, 10);
+  }
+  next();
+});
 
-// emailVerificationSchema.methods.comparePassword = async function (password) {
-//   return bcrypt.compare(password, this.password);
-// };
+emailVerificationSchema.methods.compareOtp = async function (otp) {
+  return bcrypt.compare(otp, this.otp);
+};
 
 const EmailVerification = mongoose.model(
   "EmailVerification",

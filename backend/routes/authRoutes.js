@@ -55,7 +55,7 @@ router.post("/verify-otp", async (req, res) => {
 
     if (
       !emailVerification ||
-      emailVerification.otp !== otp ||
+      !(await emailVerification.compareOtp(otp)) ||
       emailVerification.otpExpiration < new Date()
     ) {
       console.log("Invalid or expired OPT");
@@ -119,7 +119,7 @@ router.post("/reset-password", async (req, res) => {
 
     if (
       !emailVerification ||
-      emailVerification.otp !== otp ||
+      !(await emailVerification.compareOtp(otp)) ||
       emailVerification.otpExpiration < new Date()
     ) {
       console.log("Invalid or expired OPT");
