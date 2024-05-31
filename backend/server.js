@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 
+const defaultRoutes = require("./routes/defaultRoutes");
 const todoRoutes = require("./routes/todoRoutes");
 const authRoutes = require("./routes/authRoutes");
 
@@ -18,6 +19,7 @@ mongoose
   .then(() => console.log("MongoDB connection established"))
   .catch((err) => console.log("MongoDB connection error: ", err));
 
+app.use("/", defaultRoutes);
 app.use("/todos", todoRoutes);
 app.use("/auth", authRoutes);
 
